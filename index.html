@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>バックラッシによる伝達力の変化 | 創造工学実験</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- Awwwards-inspired Design Tokens & Reset --- */
+        :root {
+            --bg-color: #0b0b0d;
+            --surface-color: #131316;
+            --border-color: #222226;
+            --text-main: #f5f5f7;
+            --text-muted: #8e8e93;
+            --accent-large: #3066be; /* バックラッシ大：知的なブルー */
+            --accent-small: #d96b27; /* バックラッシ小：アクティブなオレンジ */
+            --accent-gold: #c5a880;  /* 装飾・重要要素用のゴールド */
+            --font-en: 'Montserrat', sans-serif;
+            --font-ja: 'Noto Sans JP', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-ja);
+            line-height: 1.8;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        /* --- Layout Structures --- */
+        header {
+            min-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 4rem 10%;
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+            background: radial-gradient(circle at 80% 20%, #1a1a24 0%, var(--bg-color) 60%);
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        section {
+            padding: 8rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* --- Typography --- */
+        .meta-info {
+            font-family: var(--font-en);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            color: var(--accent-gold);
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 700;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            margin-bottom: 3rem;
+        }
+
+        .subtitle {
+            font-size: clamp(1.1rem, 2vw, 1.4rem);
+            color: var(--text-muted);
+            max-width: 800px;
+            font-weight: 300;
+        }
+
+        h2 {
+            font-family: var(--font-en);
+            font-size: 2.2rem;
+            font-weight: 400;
+            margin-bottom: 4rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        h2 span {
+            font-size: 0.9rem;
+            color: var(--accent-gold);
+            border: 1px solid var(--accent-gold);
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            letter-spacing: 0.1em;
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* --- UI Components --- */
+        .card {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 3rem;
+            height: 100%;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 2.5rem;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        /* --- 02. 実験方法のステップUI --- */
+        .step-list {
+            position: relative;
+            padding-left: 2rem;
+            border-left: 1px solid var(--border-color);
+        }
+
+        .step-item {
+            position: relative;
+            margin-bottom: 3rem;
+        }
+
+        .step-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .step-number {
+            position: absolute;
+            left: -3.1rem;
+            top: 0;
+            background: var(--bg-color);
+            border: 1px solid var(--text-muted);
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-en);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* --- 03. 実験結果の並列グリッドUI --- */
+        .results-split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            margin-top: 2rem;
+        }
+
+        .result-column {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .result-column.large-panel { --panel-color: var(--accent-large); }
+        .result-column.small-panel { --panel-color: var(--accent-small); }
+
+        .panel-header {
+            border-bottom: 2px solid var(--panel-color);
+            padding-bottom: 0.5rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        /* テーブルスタイル */
+        .table-wrapper {
+            overflow-x: auto;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.85rem;
+        }
+
+        th {
+            font-family: var(--font-en);
+            color: var(--text-muted);
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-family: var(--font-en);
+        }
+
+        td.ja { font-family: var(--font-ja); }
+
+        /* SVGグラフのスタイリング */
+        .graph-box {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+        }
+
+        .graph-caption {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            font-family: var(--font-en);
+        }
+
+        .chart-svg {
+            width: 100%;
+            height: auto;
+        }
+
+        .axis { stroke: var(--border-color); stroke-width: 1.5; }
+        .grid-line { stroke: #1e1e24; stroke-width: 1; stroke-dasharray: 4; }
+        .axis-text { fill: var(--text-muted); font-family: var(--font-en); font-size: 12px; }
+        .axis-label { fill: var(--text-muted); font-family: var(--font-ja); font-size: 12px; }
+        
+        .line-large { stroke: var(--accent-large); stroke-width: 3; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+        .line-small { stroke: var(--accent-small); stroke-width: 3; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+        .dot-large { fill: var(--accent-large); }
+        .dot-small { fill: var(--accent-small); }
+
+        /* --- 05. 歯車の使用例カード --- */
+        .example-card {
+            background: linear-gradient(135deg, #131316 0%, #1a1a22 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2.5rem;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .example-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-gold);
+        }
+
+        .example-icon {
+            font-family: var(--font-en);
+            font-size: 3rem;
+            font-weight: 300;
+            color: rgba(197, 168, 128, 0.2);
+            line-height: 1;
+            margin-bottom: 1rem;
+        }
+
+        /* --- Footer / Citations --- */
+        footer {
+            padding: 5rem 0;
+            background: #070709;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+            margin-bottom: 4rem;
+        }
+
+        /* 応答性 */
+        @media (max-width: 1024px) {
+            .results-split { grid-template-columns: 1fr; gap: 4rem; }
+        }
+        @media (max-width: 768px) {
+            header { padding: 4rem 5%; }
+            .grid-2 { grid-template-columns: 1fr; }
+            .card { padding: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="meta-info">創造工学実験一実験2 (生産工学分野)</div>
+        <h1>バックラッシによる<br>伝達力の変化</h1>
+        <p class="subtitle">平歯車機構における軸のズレやバックラッシ（歯車の間隔）が，動力の伝達トルク・伝達効率に与える影響の評価</p>
+    </header>
+
+    <div class="container">
+
+        <section id="purpose">
+            <h2><span>01</span> 実験目的</h2>
+            <div class="card" style="max-width: 900px; border-left: 3px solid var(--accent-gold);">
+                <p style="font-size: 1.1rem; margin-bottom: 1.5rem; font-weight: 500;">
+                    「ギヤ機構における摩擦損失緩和と理論限界のパラドックスを実証する」
+                </p>
+                <p>歯車機構は，自動車・工作機械・ロボットなどの幅広い分野で動力伝達や回転速度の変換に不可欠な機械要素である．本実験では，今回使用した実験装置における「軸のずれ」・「組付け誤差」を現実の構造でも発生する「軸のズレ」・「組付け誤差」とみなし，<b>歯車列の隙間（バックラッシ）の大小が，伝達トルク及び伝達効率へ与える影響を明らかにすること</b>を目的とする．実測値と理論値を比較し，分析することで，適切なバックラッシ調整の重要性を理解する．</p>
+            </div>
+        </section>
+
+        <section id="method">
+            <h2><span>02</span> 実験方法</h2>
+            <div class="grid-2">
+                <div>
+                    <h3 style="margin-bottom: 2rem; color: var(--accent-gold);">【実験装置】</h3>
+                    <p style="margin-bottom: 1.5rem;">ステッピングモータ・モータドライバ・電源・平歯車（歯数48，56，64，72，モジュール1，基準圧力角20°）・ベアリングホルダ・プーリ・ワイヤ・分銅セットを用いる．</p>
+                    <p class="text-muted" style="font-size: 0.9rem;">※使用した歯車は歯数と基準円直径[mm]の数値が一致し，それぞれの基準円半径は24，28，32，36[mm]となる．</p>
+                </div>
+                <div class="step-list">
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <h3>モータ単体出力の測定</h3>
+                        <p class="text-muted">モータ軸にプーリを直結し，ワイヤを介して分銅をつるす．モータが脱調せずに回転できる限界の最大荷重（耐荷重）を測定し，モータ単体の出力トルクの基準値を求める．</p>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <h3>歯車列の組立て</h3>
+                        <p class="text-muted">2枚から5枚の平歯車の組み合わせ（4パターン）の歯車列を構築する．各軸が平行かつ適切な中心距離で噛み合うようベアリングホルダをレール上に調節し，土台をボルトで固定する．</p>
+                    </div>
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <h3>伝達トルクおよび効率の算出</h3>
+                        <p class="text-muted">出力側のプーリ（r=30.5mm）に分銅を吊るし，1回転できる最大荷重m[g]を測定する．その後，力F[N]を算出し，実際の伝達トルクT[N·mm]および伝達効率を評価する．</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="results">
+            <h2><span>03</span> 実験結果</h2>
+            <p style="color: var(--text-muted); max-width: 800px; margin-bottom: 3rem;">
+                実験の結果，モータ単体の耐荷重（70g）及び実測トルク（20.923 N·mm）に変化はなかったが，バックラッシの大小によって，歯車数増加時の挙動に極端な違いが確認された．
+            </p>
+
+            <div class="results-split">
+                <div class="result-column large-panel">
+                    <div class="panel-header">バックラッシが大きい時</div>
+                    
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Gears</th>
+                                    <th>Configuration</th>
+                                    <th>Load [g]</th>
+                                    <th>Measured [N·mm]</th>
+                                    <th>Eff. (η)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>1 (Motor)</td><td class="ja" style="color:var(--text-muted)">単体測定</td><td>70</td><td>20.923</td><td>-</td></tr>
+                                <tr><td>2</td><td class="ja">48→64</td><td>150</td><td>44.835</td><td style="color: var(--accent-large); font-weight:600;">1.6</td></tr>
+                                <tr><td>3</td><td class="ja">48→72→64</td><td>150</td><td>44.835</td><td style="color: var(--accent-large); font-weight:600;">1.6</td></tr>
+                                <tr><td>4</td><td class="ja">48→72→56→64</td><td>190</td><td>56.791</td><td style="color: var(--accent-large); font-weight:600;">2.0</td></tr>
+                                <tr><td>5</td><td class="ja">48→72→56→80→64</td><td>170</td><td>50.813</td><td style="color: var(--accent-large); font-weight:600;">1.8</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="graph-box">
+                        <div class="graph-caption">Fig 3: Transmission efficiency when backlash is large</div>
+                        <svg class="chart-svg" viewBox="0 0 400 250">
+                            <line x1="40" y1="20" x2="40" y2="210" class="axis" />
+                            <line x1="40" y1="210" x2="380" y2="210" class="axis" />
+                            <line x1="40" y1="130" x2="380" y2="130" class="grid-line" />
+                            <line x1="40" y1="50" x2="380" y2="50" class="grid-line" />
+                            
+                            <text x="15" y="215" class="axis-text">0.0</text>
+                            <text x="15" y="135" class="axis-text">1.0</text>
+                            <text x="15" y="55" class="axis-text">2.0</text>
+                            
+                            <text x="100" y="230" class="axis-text">2</text>
+                            <text x="180" y="230" class="axis-text">3</text>
+                            <text x="260" y="230" class="axis-text">4</text>
+                            <text x="340" y="230" class="axis-text">5</text>
+                            
+                            <text x="180" y="248" class="axis-label" text-anchor="middle">Number of gears</text>
+                            <text x="12" y="15" class="axis-label">η</text>
+
+                            <path d="M 100 82 L 180 82 L 260 50 L 340 66" class="line-large" />
+                            <circle cx="100" cy="82" r="4" class="dot-large" />
+                            <circle cx="180" cy="82" r="4" class="dot-large" />
+                            <circle cx="260" cy="50" r="4" class="dot-large" />
+                            <circle cx="340" cy="66" r="4" class="dot-large" />
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="result-column small-panel">
+                    <div class="panel-header">バックラッシが小さい時</div>
+                    
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Gears</th>
+                                    <th>Configuration</th>
+                                    <th>Load [g]</th>
+                                    <th>Measured [N·mm]</th>
+                                    <th>Eff. (η)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>1 (Motor)</td><td class="ja" style="color:var(--text-muted)">単体測定</td><td>70</td><td>20.923</td><td>-</td></tr>
+                                <tr><td>2</td><td class="ja">48→64</td><td>90</td><td>26.901</td><td style="color: var(--accent-small); font-weight:600;">1.0</td></tr>
+                                <tr><td>3</td><td class="ja">48→72→64</td><td>40</td><td>11.956</td><td style="color: var(--accent-small); font-weight:600;">0.4</td></tr>
+                                <tr><td>4</td><td class="ja">48→72→56→64</td><td>30</td><td>8.967</td><td style="color: var(--accent-small); font-weight:600;">0.3</td></tr>
+                                <tr><td>5</td><td class="ja">48→72→56→80→64</td><td>10</td><td>2.989</td><td style="color: var(--accent-small); font-weight:600;">0.1</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="graph-box">
+                        <div class="graph-caption">Fig 5: Transmission efficiency when backlash is small</div>
+                        <svg class="chart-svg" viewBox="0 0 400 250">
+                            <line x1="40" y1="20" x2="40" y2="210" class="axis" />
+                            <line x1="40" y1="210" x2="380" y2="210" class="axis" />
+                            <line x1="40" y1="130" x2="380" y2="130" class="grid-line" />
+                            <line x1="40" y1="50" x2="380" y2="50" class="grid-line" />
+                            
+                            <text x="15" y="215" class="axis-text">0.0</text>
+                            <text x="15" y="130" class="axis-text">0.5</text>
+                            <text x="15" y="50" class="axis-text">1.0</text>
+                            
+                            <text x="100" y="230" class="axis-text">2</text>
+                            <text x="180" y="230" class="axis-text">3</text>
+                            <text x="260" y="230" class="axis-text">4</text>
+                            <text x="340" y="230" class="axis-text">5</text>
+                            
+                            <text x="180" y="248" class="axis-label" text-anchor="middle">Number of gears</text>
+                            <text x="12" y="15" class="axis-label">η</text>
+
+                            <path d="M 100 50 L 180 146 L 260 162 L 340 194" class="line-small" />
+                            <circle cx="100" cy="50" r="4" class="dot-small" />
+                            <circle cx="180" cy="146" r="4" class="dot-small" />
+                            <circle cx="260" cy="162" r="4" class="dot-small" />
+                            <circle cx="340" cy="194" r="4" class="dot-small" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="discussion">
+            <h2><span>04</span> 考察</h2>
+            <div class="grid-2">
+                <div class="card" style="border-top: 3px solid var(--accent-large);">
+                    <h3 style="color: var(--accent-large);">バックラッシが大きい場合</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">歯車の隙間によるズレとブレの吸収</p>
+                    <p>バックラッシを大きく設定した場合，<b>伝達効率が「1」を大きく上回り（1.6〜2.0），本来あり得ない現象</b>が確認された．この要因として初めのモータ単体測定時，軸のズレによってベアリングホルダ間に摩擦が発生し，本来より小さな限界値（70g）しか測定できていなかった可能性が挙げられる．</p>
+                    <p style="margin-top: 1rem;">軸ズレがない場合の本来のモータ耐荷重は式より<b>約112.5g</b>と推測される．歯車列を組み，バックラッシを広くしたことで，歯車同士の隙間が軸のズレや回転時のブレを吸収し，モータ本来の出力がスムーズに発揮され，見かけ上の効率が1を超えたと考えられる．</p>
+                </div>
+                <div class="card" style="border-top: 3px solid var(--accent-small);">
+                    <h3 style="color: var(--accent-small);">バックラッシが小さい場合</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">誤差の蓄積による急激な摩擦損失</p>
+                    <p>バックラッシを小さく設定した場合，2枚構成では耐荷重が90gとなり理論耐荷重（91g）とほぼ一致し，極めて理想的といえる伝達が行われた．しかし，<b>歯車数が増えるに従って伝達効率は急激に低下し</b>，5枚構成では耐荷重はわずか10g（伝達効率はわずか0.1）にまで落ち込んだ．</p>
+                    <p style="margin-top: 1rem;">これは，歯車の数が増加することで各軸の「軸ズレ」や「組付け誤差」が累積し，さらに歯面間の隙間が狭すぎるために力の逃げ場がなくなり，歯面同士が過剰に干渉し合うことで<b>摩擦損失が著しく増大したためだ</b>と考えられる．</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="examples">
+            <h2><span>05</span> 歯車機構の応用例</h2>
+            <p style="color: var(--text-muted); margin-bottom: 3rem;">本実験で扱った平歯車をはじめとする歯車機構は、トルク変換・速度変換の特性を活かし、現代社会のあらゆる精密機械に応用されています。</p>
+            <div class="grid-3">
+                <div class="example-card">
+                    <div class="example-icon">01</div>
+                    <h3>自動車のトランスミッション</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-muted);">エンジンの高回転動力を、走行状況に応じて適切なトルクと回転数に変換して車輪に伝えるコア機構。バックラッシの最適化が燃費や静粛性に直結します。</p>
+                </div>
+                <div class="example-card">
+                    <div class="example-icon">02</div>
+                    <h3>産業用ロボットのマニピュレータ</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-muted);">関節部に高精度な減速機（歯車列）が組み込まれています。ロボットアームが正確な位置にピタッと止まるため、バックラッシを極限まで排除する設計が求められます。</p>
+                </div>
+                <div class="example-card">
+                    <div class="example-icon">03</div>
+                    <h3>工作機械の送り機構</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-muted);">金属などを削る旋盤やマシニングセンタにおいて、刃物台を1ミクロン単位で正確に移動させるために使用されます。ガタつき（バックラッシ）の排除が加工精度を左右します。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="conclusion" style="border-bottom: none;">
+            <h2><span>06</span> まとめ</h2>
+            <div class="card" style="background: linear-gradient(180deg, #131316 0%, #070709 100%); border: 1px solid var(--accent-gold); padding: 4rem 3rem;">
+                <div style="max-width: 850px; margin: 0 auto;">
+                    <p style="font-size: 1.15rem; font-weight: 500; line-height: 1.8; margin-bottom: 2rem;">
+                        本実験を通じて、バックラッシは単なる機械の「緩み・ガタ」ではなく、<br>
+                        実験装置や実際の機械構造に不可避に存在する<span style="color: var(--accent-gold); font-weight: 700;">「軸ズレや組付け誤差による摩擦を緩和・吸収する」重要な設計因子</span>であることが実証されました。
+                    </p>
+                    <p style="color: var(--text-muted); font-size: 0.95rem;">
+                        軸のズレが存在する環境下でバックラッシを極端に小さくすると、歯車数が増えるにつれて摩擦が増大し、動力伝達は破綻します。一方で、バックラッシを大きくすればブレを吸収して損失は減りますが、今度は理論値から乖離した不正確な伝達（ガタつき）が生まれます。機械システムの伝達性能を最大化するためには、<b>組付け精度や軸数に応じてバックラッシを適切な値へとチューニング（最適化）すること</b>が必要不可欠です。
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                
+                <div>
+                    <p style="font-weight: 600; color: var(--text-main); margin-bottom: 1rem;">参考文献</p>
+                    <ol style="padding-left: 1.2rem;">
+                        <li>佐渡精密株式会社、「【図表で解説】 歯車(ギア)の種類・用途について」、技術コラム</li>
+                        <li>塩田忠、「歯車機構」、機構デザイン学第12回講義資料</li>
+                        <li>創造工学実験テキスト, (2026), pp.37-63</li>
+                    </ol>
+                </div>
+            </div>
+            <p style="text-align: center; font-size: 0.8rem; opacity: 0.4; letter-spacing: 0.05em;">
+                &copy; 2026 Creative Engineering Laboratory. Production Engineering Field. All Rights Reserved.
+            </p>
+        </div>
+    </footer>
+
+</body>
+</html>
